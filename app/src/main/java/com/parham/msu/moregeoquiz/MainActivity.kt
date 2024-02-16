@@ -7,6 +7,7 @@ import android.os.PersistableBundle
 import android.util.Log
 import android.widget.Toast
 import com.parham.msu.moregeoquiz.databinding.ActivityMainBinding
+import kotlin.math.roundToInt
 
 private const val TAG = "MainActivity"
 class MainActivity : AppCompatActivity() {
@@ -52,10 +53,6 @@ class MainActivity : AppCompatActivity() {
             currentIndex = (currentIndex + 1) % questionBank.size
             updateQuestion()
             setButtonState(true)
-            if (currentIndex == 0) {
-                finalScore()
-                reset()
-            }
 
         }
         binding.previousButton.setOnClickListener{
@@ -77,15 +74,22 @@ class MainActivity : AppCompatActivity() {
     private fun checkAnswer(userAnswer:Boolean) {
         val correctAnswer = questionBank[currentIndex].answer
 
+        if (userAnswer == correctAnswer) {
+            correctAnswerCount++
+        }
+
         val messageResId = if (userAnswer == correctAnswer){
             R.string.correct_toast
-            correctAnswerCount++
         } else {
             R.string.incorrect_toast
         }
 
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
             .show()
+        if (currentIndex == questionBank.size - 1) {
+            finalScore()
+            reset()
+        }
     }
 
     private fun setButtonState(enabled:Boolean) {
@@ -95,9 +99,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun finalScore() {
-        val percentage = (correctAnswerCount * 100.0 / totalQuestion).toInt()
-        val message = "Quiz completed! Your score: $correctAnswerCount/$totalQuestion (${percentage}%)"
+        val percentage = ((correctAnswerCount * 100.0 / questionBank.size).roundToInt())
+        val formattedPercentage = String.format("%.1f", percentage.toDouble())
 
+        val message = "Quiz complete! Your score is $formattedPercentage%"
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
     private fun reset() {
